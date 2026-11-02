@@ -143,7 +143,19 @@ export class ChannelRegistry {
     const domains = channel.allowedDomains || config.allowedDomains;
     if (domains.includes('*')) return true;
 
-    return domains.some((d) => origin === d || origin.endsWith(`.${d}`));
+    let reqHost = '';
+    try {
+      reqHost = new URL(origin).hostname.toLowerCase();
+    } catch {
+      reqHost = origin.toLowerCase().replace(/^https?:\/\//, '').split(':')[0];
+    }
+
+    if (reqHost === 'localhost' || reqHost === '127.0.0.1') return true;
+
+    return domains.some((rawDomain) => {
+      const d = rawDomain.toLowerCase().replace(/^https?:\/\//, '').split(':')[0].trim();
+      return reqHost === d || reqHost.endsWith(`.${d}`);
+    });
   }
 }
 

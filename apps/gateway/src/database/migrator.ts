@@ -184,6 +184,7 @@ ALTER TABLE channels ADD COLUMN IF NOT EXISTS away_message TEXT;
 ALTER TABLE channels ADD COLUMN IF NOT EXISTS primary_color VARCHAR(16) DEFAULT '#00E5FF';
 ALTER TABLE channels ADD COLUMN IF NOT EXISTS accent_color VARCHAR(16) DEFAULT '#2563EB';
 ALTER TABLE channels ADD COLUMN IF NOT EXISTS logo_url TEXT;
+ALTER TABLE channels ADD COLUMN IF NOT EXISTS updated_at BIGINT;
 CREATE INDEX IF NOT EXISTS idx_channels_connection ON channels (waba_connection_id);
 
 CREATE TABLE IF NOT EXISTS channel_agents (

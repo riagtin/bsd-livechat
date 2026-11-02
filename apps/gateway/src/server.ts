@@ -46,8 +46,21 @@ export async function buildServer() {
         return cb(null, true);
       }
 
-      const isAllowed = config.allowedDomains.some((domain) => {
-        return origin === domain || origin.endsWith(`.${domain}`);
+      let reqHost = '';
+      try {
+        reqHost = new URL(origin).hostname.toLowerCase();
+      } catch {
+        reqHost = origin.toLowerCase().replace(/^https?:\/\//, '').split(':')[0];
+      }
+
+      // Selalu izinkan local development (localhost & 127.0.0.1)
+      if (reqHost === 'localhost' || reqHost === '127.0.0.1') {
+        return cb(null, true);
+      }
+
+      const isAllowed = config.allowedDomains.some((rawDomain) => {
+        const domain = rawDomain.toLowerCase().replace(/^https?:\/\//, '').split(':')[0].trim();
+        return reqHost === domain || reqHost.endsWith(`.${domain}`);
       });
 
       if (isAllowed) {

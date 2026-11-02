@@ -1,127 +1,129 @@
 # 💬 BSD LiveChat Gateway (Official Meta WhatsApp Cloud API Bridge)
 
 > **"Digital Innovation Without Limits."**  
-> Resmi dikembangkan oleh  **Bintang Studio**
+> Resmi dikembangkan oleh **Bintang Studio** ([bintangstudio.tech](https://bintangstudio.tech))
 
-**BSD LiveChat** adalah ekosistem Live Chat mandiri (*standalone & reusable*) yang menghubungkan langsung:
-* **Pengunjung Website / Aplikasi** $\longleftrightarrow$ **WhatsApp Ponsel Tim CS / Owner**.
-* **Pengunjung:** Mengobrol langsung dari widget mengambang di website tanpa perlu menginstal atau membuka aplikasi WhatsApp.
-* **Tim CS / Owner:** Menerima pesan dan membalas obrolan langsung dari aplikasi WhatsApp di ponsel mereka melalui integrasi **Meta WhatsApp Cloud API Resmi v22.0**.
-
----
-
-## 🌟 Fitur Unggulan
-
-1. **Zero Barrier to Chat:** Pengunjung dapat langsung bertanya tanpa dipaksa scan QR code WhatsApp Web atau membuka aplikasi WhatsApp di ponsel.
-2. **Pencegahan Kebocoran Data (*Anti-Data-Breach Quote Resolution*):** Balasan CS dari WhatsApp dipetakan secara presisi ke sesi pengunjung menggunakan *Quote Reply* (`context.id`) atau prefix tag `#SESSION_ID`. Jika CS membalas tanpa quote saat ada $\ge 2$ pengunjung aktif, sistem menolak meneruskan dan otomatis mengirim peringatan ke WhatsApp CS.
-3. **Auto-Wakeup Jendela Layanan 24 Jam Meta:** Jika jendela 24 jam ke nomor CS tertutup (Error 131047), Gateway otomatis mengirimkan Utility Template resmi (`bsd_livechat_alert`) yang disanitasi (tanpa newline, maks 300 karakter). Begitu CS membalas, jendela 24 jam teks bebas terbuka kembali secara gratis.
-4. **Centang Biru Real-Time (`agent_read`):** Ketika CS membuka pesan di WhatsApp ponsel, status centang dua biru (✓✓) otomatis muncul di gelembung pesan pengunjung di layar website.
-5. **Debouncing & Batching (2.5 Detik):** Pesan beruntun dari pengunjung digabungkan menjadi 1 bubble rapi ke WhatsApp CS sehingga ponsel CS tidak bergetar berlebihan dan lebih mudah di-quote.
-6. **Keep-Alive Heartbeat (25 Detik):** Mencegah koneksi SSE ditutup oleh Cloudflare atau NGINX proxy saat obrolan sedang senggang.
-7. **Isolasi Tampilan Shadow DOM:** Widget dibungkus 100% di dalam Shadow DOM sehingga tampilan Tailwind CSS v4 tidak akan pernah merusak atau terpengaruh oleh CSS website tuan rumah (WordPress, Next.js, Bootstrap, dll).
+**BSD LiveChat** adalah jembatan obrolan langsung (live chat) mandiri yang menghubungkan:
+* **Pengunjung Website / Aplikasi** $\longleftrightarrow$ **WhatsApp Ponsel Tim CS / Pemilik Usaha**.
+* **Pengunjung:** Mengobrol langsung dari widget di website tanpa perlu memasang atau membuka aplikasi WhatsApp.
+* **Tim CS / Pemilik Usaha:** Menerima notifikasi dan membalas obrolan langsung dari aplikasi WhatsApp di ponsel mereka melalui integrasi **Meta WhatsApp Cloud API Resmi v22.0**.
 
 ---
 
-## 📁 Struktur Monorepo
+## 🌟 Fitur Utama
+
+1. **Langsung Mengobrol:** Pengunjung tidak perlu login, tidak perlu scan QR code WhatsApp Web, dan tidak dialihkan keluar dari website.
+2. **Pencegahan Salah Kamar Pesan (*Anti-Data-Breach Quote Resolution*):** Balasan CS dari WhatsApp dipetakan secara presisi ke sesi pengunjung menggunakan *Quote Reply* (`context.id`) atau awalan kode `#SESSION_ID`. Jika CS membalas tanpa quote saat ada 2 atau lebih obrolan yang sedang aktif, sistem otomatis menolak pesan tersebut dan mengirim notifikasi peringatan ke WhatsApp CS agar pesan tidak terkirim ke pengunjung yang salah.
+3. **Pemulihan Jendela 24 Jam Meta Otomatis:** Jika jendela gratis 24 jam ke WhatsApp CS tertutup (Error 131047), gateway otomatis mengirimkan Utility Template resmi (`bsd_livechat_alert`). Saat CS membalas template tersebut, jendela obrolan gratis langsung aktif kembali.
+4. **Indikator Centang Biru Real-Time:** Saat CS membaca pesan di aplikasi WhatsApp ponsel, status centang dua biru otomatis tampil pada balon pesan pengunjung di website.
+5. **Penggabungan Pesan Beruntun (Debounce 2.5 Detik):** Pesan yang diketik berulang kali oleh pengunjung digabungkan ke dalam satu balon pesan WhatsApp, sehingga ponsel CS tidak berdering terus-menerus dan mudah dibalas.
+6. **Koneksi Stabil (Keep-Alive 25 Detik):** Menjaga jalur Server-Sent Events (SSE) tetap terbuka dan tidak terputus oleh proxy atau reverse proxy saat obrolan sedang senggang.
+7. **Isolasi Penuh Shadow DOM:** Tampilan widget dibungkus rapi di dalam Shadow DOM. CSS website utama (WordPress, Next.js, Laravel, HTML statis) tidak akan merusak gaya visual widget.
+
+---
+
+## 📁 Struktur Direktori
 
 ```text
-C:\BSD\livechat/
+.
 ├── apps/
-│   ├── gateway/         # [SERVER BRIDGE] Fastify + SSE + Meta Cloud API v22.0 (AGPL-3.0)
-│   ├── console/         # [CONSOLE] Merchant Dashboard Next.js 16 (Proprietary Cloud)
-│   └── demo/            # [SHOWCASE] Halaman uji coba live chat lokal
+│   ├── gateway/         # Server backend Fastify + SSE + Meta Cloud API v22.0 (AGPL-3.0)
+│   └── demo/            # Halaman web uji coba widget lokal
 │
 └── packages/
-    ├── sdk/             # [TYPES & CRYPTO] Shared types & HMAC verification (MPL-2.0)
-    ├── react/           # [REACT COMPONENT] Thin loader React / Next.js (MPL-2.0)
-    └── widget/          # [EMBEDDABLE UI] Shadow DOM Widget (AGPL-3.0 + §7b)
+    ├── sdk/             # Tipe data bersama & utilitas verifikasi HMAC (MPL-2.0)
+    ├── react/           # Komponen siap pakai untuk React / Next.js (MPL-2.0)
+    └── widget/          # Widget antarmuka Shadow DOM (AGPL-3.0 + Ketentuan Tambahan §7b)
 ```
 
 ---
 
-## 🐳 Quickstart Standalone via Docker Compose (Community Self-Host)
+## 🐳 Menjalankan Cepat dengan Docker Compose (Self-Hosted)
 
-Bagi pengembang yang ingin menjalankan gateway secara instan tanpa mengompilasi kode sumber:
+Bagi pengembang yang ingin langsung mencoba gateway tanpa perlu kompilasi:
 
 ```bash
-# 1. Unduh docker-compose.selfhost.yml
-# 2. Siapkan file .env berisi kredensial Meta
-# 3. Jalankan server kontainer:
+# 1. Pastikan file docker-compose.selfhost.yml dan .env sudah siap
+# 2. Jalankan container:
 docker compose -f docker-compose.selfhost.yml up -d
 ```
 
 ---
 
-## 🚀 Cara Menggunakan
+## 🚀 Cara Pemasangan Widget
 
-### Mode 1: Salin 1 Baris Tag Script (HTML / WordPress / PHP / Shopify)
+### 1. Tag Script HTML (WordPress, PHP, Laravel, Shopify, Web Statis)
 
-Cukup tambahkan tag berikut sebelum penutup `</body>`:
+Tempelkan kode ini tepat sebelum penutup tag `</body>`:
 
 ```html
 <script 
-  src="https://cdn.bintangstudio.tech/chat/widget.js" 
-  data-gateway-url="https://api-chat.bintangstudio.tech" 
+  src="https://chat.example.com/widget.js" 
+  data-gateway-url="https://chat.example.com" 
   data-business-name="Bintang Studio Support"
   data-theme="dark"
   defer>
 </script>
 ```
 
-### Mode 2: Menggunakan Paket NPM (React / Next.js / Vue)
+> **Catatan:** Ganti `https://chat.example.com` dengan URL domain gateway Anda sendiri (atau `http://localhost:3100` untuk pengujian lokal).
 
-Instal paket:
+### 2. Komponen React / Next.js
+
+Pasang paket resmi:
 ```bash
-pnpm add @bintangstudio/livechat-widget
-# atau: npm install @bintangstudio/livechat-widget
+npm install @bintangstudio/livechat-react
+# atau: pnpm add @bintangstudio/livechat-react
 ```
 
-Gunakan di komponen:
+Gunakan di dalam komponen atau layout aplikasi:
 ```tsx
-import { BsdChatWidget } from '@bintangstudio/livechat-widget';
+import { LiveChatWidget } from '@bintangstudio/livechat-react';
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <>
-      {children}
-      <BsdChatWidget 
-        gatewayUrl="https://api-chat.bintangstudio.tech"
-        businessName="Bintang Studio Support"
-        welcomeMessage="Halo! Ada yang bisa kami bantu seputar produk kami?"
-        theme="dark"
-      />
-    </>
+    <html>
+      <body>
+        {children}
+        <LiveChatWidget 
+          gatewayUrl="https://chat.example.com"
+          businessName="Bintang Studio Support"
+          welcomeMessage="Halo! Ada yang bisa kami bantu hari ini?"
+          theme="dark"
+        />
+      </body>
+    </html>
   );
 }
 ```
 
 ---
 
-## ⚙️ Menjalankan Server Gateway Sendiri (Self-Hosted)
+## ⚙️ Menjalankan Server Gateway Secara Mandiri
 
-### 1. Salin File Environment
+### 1. Siapkan Berkas Konfigurasi
 ```bash
 cd apps/gateway
 cp .env.example .env
 ```
 
-### 2. Isi Kredensial Meta WhatsApp Cloud API
-Edit file `.env`:
+### 2. Atur Variabel Lingkungan (.env)
+Sesuaikan nilai kredensial Meta WhatsApp Cloud API Anda:
 ```env
 PORT=3100
 BUSINESS_NAME=Bintang Studio Support
-ALLOWED_DOMAINS=http://localhost:3000,https://domainanda.com
+ALLOWED_DOMAINS=http://localhost:3000,https://example.com
 
 # Kredensial Meta Developer Portal (v22.0)
 META_PHONE_NUMBER_ID=123456789012345
 META_ACCESS_TOKEN=EAAG...
 META_APP_SECRET=your_app_secret
-META_VERIFY_TOKEN=bsd_livechat_webhook_secret
+META_VERIFY_TOKEN=your_custom_webhook_verify_token
 
-# Nomor WhatsApp Ponsel CS Tujuan (Format internasional tanpa +)
+# Nomor WhatsApp CS Tujuan (Format internasional tanpa tanda +)
 CS_WHATSAPP_PHONE=6281234567890
 
-# Template Resmi Meta (Utility)
+# Utility Template Meta
 META_UTILITY_TEMPLATE_NAME=bsd_livechat_alert
 META_TEMPLATE_LANGUAGE=id
 ```
@@ -135,12 +137,13 @@ pnpm --filter bsd-livechat-gateway start
 
 ---
 
-## 📝 Format Utility Template Meta (`bsd_livechat_alert`)
-Daftarkan template ini di **Meta Business Manager** $\to$ **WhatsApp Manager** $\to$ **Message Templates**:
-* **Template Name:** `bsd_livechat_alert`
-* **Category:** `UTILITY`
-* **Language:** `Indonesian (id)`
-* **Body Text:**
+## 📝 Pendaftaran Template WhatsApp di Meta Manager
+
+Daftarkan template ini melalui **Meta Business Manager** $\to$ **WhatsApp Manager** $\to$ **Message Templates**:
+* **Nama Template:** `bsd_livechat_alert`
+* **Kategori:** `UTILITY`
+* **Bahasa:** `Indonesian (id)`
+* **Isi Pesan (Body Text):**
   ```text
   [BSD LiveChat Notification]
   Ada pesan baru dari pengunjung website (Sesi: {{1}}).
@@ -152,15 +155,13 @@ Daftarkan template ini di **Meta Business Manager** $\to$ **WhatsApp Manager** $
 
 ---
 
-## 📄 Lisensi & Tata Kelola Dual-Track
-
-Mulai rilis **`v2.0.0`**, BSD LiveChat menerapkan tata kelola lisensi **Dual-Track**:
+## 📄 Lisensi Proyek
 
 * **Server Gateway (`apps/gateway`)**: Dilisensikan di bawah [GNU Affero General Public License v3.0 (AGPL-3.0-only)](LICENSE).
-* **Frontend Widget (`packages/widget`)**: Dilisensikan di bawah [AGPL-3.0-only](LICENSE) dengan **Ketentuan Tambahan Pasal 7(b)** (kewajiban mempertahankan atribusi *"Powered by Bintang Studio"* ke `https://bintangstudio.tech`, lihat berkas [NOTICE](NOTICE)).
-* **Integrasi SDK (`packages/sdk`) & Loader React (`packages/react`)**: Dilisensikan di bawah [Mozilla Public License 2.0 (MPL-2.0)](LICENSES/MPL-2.0.txt) agar dapat diimpor langsung ke aplikasi web tanpa menulari kode merchant.
-* **Kebijakan Merek Dagang**: Nama "Bintang Studio", "BSD LiveChat", dan logo dilindungi hak merek dagang (lihat [TRADEMARKS.md](TRADEMARKS.md)).
+* **Frontend Widget (`packages/widget`)**: Dilisensikan di bawah [AGPL-3.0-only](LICENSE) dengan **Ketentuan Tambahan Pasal 7(b)** (kewajiban mempertahankan atribusi *"Powered by Bintang Studio"* dengan tautan aktif ke `https://bintangstudio.tech`, lihat berkas [NOTICE](NOTICE)).
+* **Integrasi SDK (`packages/sdk`) & Loader React (`packages/react`)**: Dilisensikan di bawah [Mozilla Public License 2.0 (MPL-2.0)](LICENSES/MPL-2.0.txt) agar dapat diimpor langsung ke aplikasi web tanpa mengubah lisensi kode aplikasi Anda.
+* **Merek Dagang**: Nama "Bintang Studio", "BSD LiveChat", dan logo dilindungi hak merek dagang (lihat [TRADEMARKS.md](TRADEMARKS.md)).
 
-*Catatan: Versi historis ≤ 1.x berlisensi MIT dinyatakan deprecated dan tidak lagi dipelihara.*
+*Catatan: Versi historis ≤ 1.x berlisensi MIT sudah dinyatakan usang (deprecated) dan tidak lagi dipelihara.*
 
-Hak Cipta &copy; 2026 **PT. BINTANG STUDIO DIGITAL**. Hak cipta dilindungi undang-undang.
+Hak Cipta &copy; 2026 **Bintang Studio Digital**. Hak cipta dilindungi undang-undang.
