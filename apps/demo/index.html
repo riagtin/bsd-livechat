@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BSD LiveChat Playground — Bintang Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #05070B;
+      --card-bg: rgba(255, 255, 255, 0.03);
+      --border: rgba(255, 255, 255, 0.08);
+      --primary: #00E5FF;
+      --accent: #2563EB;
+      --text: #F8FAFC;
+      --muted: #94A3B8;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      position: relative;
+    }
+    .aurora {
+      position: absolute;
+      top: -20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 450px;
+      background: radial-gradient(circle, rgba(0, 229, 255, 0.12) 0%, rgba(37, 99, 235, 0.05) 50%, transparent 70%);
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    header {
+      padding: 24px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      font-size: 20px;
+      letter-spacing: -0.5px;
+    }
+    .brand span {
+      background: linear-gradient(135deg, #00E5FF, #38BDF8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .tag {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(0, 229, 255, 0.1);
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      color: var(--primary);
+      font-weight: 600;
+    }
+    main {
+      flex: 1;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 60px 24px;
+      z-index: 1;
+      text-align: center;
+    }
+    h1 {
+      font-size: 48px;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -1px;
+      margin-bottom: 20px;
+    }
+    h1 span {
+      background: linear-gradient(135deg, #00E5FF, #2563EB);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    p.subtitle {
+      font-size: 18px;
+      color: var(--muted);
+      max-width: 680px;
+      margin: 0 auto 40px auto;
+      line-height: 1.6;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 50px;
+      text-align: left;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      backdrop-filter: blur(10px);
+      transition: border-color 0.3s;
+    }
+    .card:hover {
+      border-color: rgba(0, 229, 255, 0.3);
+    }
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(0, 229, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      font-size: 20px;
+    }
+    .card h3 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .card p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .cta-banner {
+      background: linear-gradient(135deg, rgba(0, 229, 255, 0.05), rgba(37, 99, 235, 0.08));
+      border: 1px solid rgba(0, 229, 255, 0.2);
+      border-radius: 20px;
+      padding: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-align: left;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .cta-banner h2 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .cta-banner p {
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .arrow-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--primary);
+      font-weight: 600;
+      animation: bounce-subtle 2s infinite;
+    }
+    @keyframes bounce-subtle {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    footer a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="aurora"></div>
+
+  <header>
+    <div class="brand">
+      Bintang Studio <span>LiveChat</span>
+    </div>
+    <div class="tag">Official Meta Cloud API v22.0</div>
+  </header>
+
+  <main>
+    <h1>Obrolan Website Instan,<br><span>Langsung Masuk ke WhatsApp CS</span></h1>
+    <p class="subtitle">
+      Pengunjung mengobrol langsung di website tanpa harus membuka aplikasi WhatsApp. Tim CS merespons dari ponsel WhatsApp seperti biasa.
+    </p>
+
+    <div class="features-grid">
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <h3>Zero Barrier to Chat</h3>
+        <p>Pengunjung tidak dipaksa scan QR code atau login. Cukup ketik dan obrolan langsung terhubung.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🛡️</div>
+        <h3>Anti-Data Breach Quote</h3>
+        <p>Balasan CS dipetakan dengan tepat ke sesi browser menggunakan quote ID, mencegah salah kirim antar-pengunjung.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">✓✓</div>
+        <h3>Centang Biru Real-Time</h3>
+        <p>Saat CS membuka pesan di WhatsApp ponsel, status centang dua biru otomatis tampil di widget layar pengunjung.</p>
+      </div>
+    </div>
+
+    <div class="cta-banner">
+      <div>
+        <h2>Uji Coba Widget LiveChat Sekarang</h2>
+        <p>Klik tombol obrolan mengambang di pojok kanan bawah untuk menguji alur komunikasi secara langsung.</p>
+      </div>
+      <div class="arrow-indicator">
+        👉 Coba tombol chat di kanan bawah ↘
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2026 PT. BINTANG STUDIO DIGITAL. Slogan: <em>"Digital Innovation Without Limits."</em>
+  </footer>
+
+  <!-- EMBED STANDALONE WIDGET BSD LIVECHAT -->
+  <script 
+    src="../../packages/widget/dist/widget.js" 
+    data-gateway-url="http://localhost:3100" 
+    data-business-name="Bintang Studio Support"
+    data-welcome-message="Halo! Selamat datang di Bintang Studio. Silakan tanyakan apa pun tentang layanan kami."
+    data-theme="dark"
+    data-position="bottom-right"
+    defer>
+  </script>
+</body>
+</html>

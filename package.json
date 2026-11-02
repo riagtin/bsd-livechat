@@ -1,0 +1,34 @@
+{
+  "name": "bsd-livechat-monorepo",
+  "version": "2.0.0",
+  "type": "module",
+  "private": true,
+  "description": "BSD LiveChat - Official Meta WhatsApp Cloud API Live Chat Bridge by PT. BINTANG STUDIO DIGITAL",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "vitest run",
+    "clean": "turbo run clean"
+  },
+  "keywords": [
+    "livechat",
+    "whatsapp",
+    "meta-cloud-api",
+    "waba",
+    "bintang-studio"
+  ],
+  "author": "PT. BINTANG STUDIO DIGITAL <support@bintangstudio.tech>",
+  "license": "AGPL-3.0-only",
+  "homepage": "https://bintangstudio.tech",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bintangstudio/livechat.git"
+  },
+  "devDependencies": {
+    "turbo": "^2.4.4",
+    "typescript": "^5.8.2",
+    "vitest": "^5.0.5"
+  },
+  "packageManager": "pnpm@11.21.0"
+}

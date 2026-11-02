@@ -1,0 +1,38 @@
+{
+  "name": "@bintangstudio/livechat-react",
+  "version": "2.0.0",
+  "description": "Lightweight React loader component for BSD LiveChat (MPL-2.0)",
+  "license": "MPL-2.0",
+  "author": "PT. BINTANG STUDIO DIGITAL <support@bintangstudio.tech>",
+  "homepage": "https://bintangstudio.tech",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bintangstudio/livechat.git",
+    "directory": "packages/react"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "clean": "rimraf dist"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.9",
+    "@types/react": "^19.0.10",
+    "react": "^19.0.0",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.3.6",
+    "typescript": "^5.8.2"
+  }
+}

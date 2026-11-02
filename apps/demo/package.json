@@ -1,0 +1,9 @@
+{
+  "name": "bsd-livechat-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Showcase and testing playground for BSD LiveChat Widget",
+  "scripts": {
+    "dev": "npx serve -l 5173 ."
+  }
+}

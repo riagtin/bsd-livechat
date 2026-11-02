@@ -1,0 +1,57 @@
+name: Publish NPM Packages
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  publish-npm:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.21.0
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify Types and Run Tests
+        run: |
+          pnpm test
+
+      - name: Compile Distributable Artifacts
+        run: |
+          pnpm --filter @bintangstudio/livechat-sdk run build
+          pnpm --filter @bintangstudio/livechat-react run build
+          pnpm --filter @bintangstudio/livechat-widget run build
+
+      - name: Publish @bintangstudio/livechat-sdk (MPL-2.0)
+        run: pnpm --filter @bintangstudio/livechat-sdk publish --no-git-checks --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @bintangstudio/livechat-react (MPL-2.0)
+        run: pnpm --filter @bintangstudio/livechat-react publish --no-git-checks --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @bintangstudio/livechat-widget (AGPL-3.0-only)
+        run: pnpm --filter @bintangstudio/livechat-widget publish --no-git-checks --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+

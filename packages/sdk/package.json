@@ -1,0 +1,33 @@
+{
+  "name": "@bintangstudio/livechat-sdk",
+  "version": "2.0.0",
+  "description": "Shared SDK and type definitions for BSD LiveChat (Official Meta WhatsApp Cloud API Bridge)",
+  "license": "MPL-2.0",
+  "author": "PT. BINTANG STUDIO DIGITAL <support@bintangstudio.tech>",
+  "homepage": "https://bintangstudio.tech",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bintangstudio/livechat.git",
+    "directory": "packages/sdk"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "clean": "rimraf dist"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.9",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.3.6",
+    "typescript": "^5.8.2"
+  }
+}

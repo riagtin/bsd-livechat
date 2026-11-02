@@ -1,0 +1,34 @@
+{
+  "name": "@bintangstudio/livechat-widget",
+  "version": "2.0.0",
+  "description": "Embeddable, zero-dependency, Shadow DOM Live Chat Widget for BSD LiveChat",
+  "license": "AGPL-3.0-only",
+  "author": "PT. BINTANG STUDIO DIGITAL <support@bintangstudio.tech>",
+  "homepage": "https://bintangstudio.tech",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bintangstudio/livechat.git",
+    "directory": "packages/widget"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "clean": "rimraf dist"
+  },
+  "devDependencies": {
+    "@bintangstudio/livechat-sdk": "workspace:*",
+    "@types/node": "^22.13.9",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.3.6",
+    "typescript": "^5.8.2"
+  }
+}

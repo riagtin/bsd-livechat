@@ -1,0 +1,59 @@
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.selfhost
+    container_name: bsd-livechat-gateway
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3100}:3100"
+    environment:
+      - PORT=3100
+      - HOST=0.0.0.0
+      - NODE_ENV=production
+      - BUSINESS_NAME=${BUSINESS_NAME:-Bintang Studio Support}
+      - ALLOWED_DOMAINS=${ALLOWED_DOMAINS:-*}
+      - META_API_VERSION=${META_API_VERSION:-v22.0}
+      - META_PHONE_NUMBER_ID=${META_PHONE_NUMBER_ID}
+      - META_ACCESS_TOKEN=${META_ACCESS_TOKEN}
+      - META_APP_SECRET=${META_APP_SECRET}
+      - META_VERIFY_TOKEN=${META_VERIFY_TOKEN}
+      - CS_WHATSAPP_PHONE=${CS_WHATSAPP_PHONE}
+      - META_UTILITY_TEMPLATE_NAME=${META_UTILITY_TEMPLATE_NAME:-livechat_ticket_alert}
+      - META_TEMPLATE_LANGUAGE=${META_TEMPLATE_LANGUAGE:-id}
+      - ADMIN_API_TOKEN=${ADMIN_API_TOKEN}
+      - SESSION_SIGNING_SECRET=${SESSION_SIGNING_SECRET}
+      - MAX_PRE_REPLY_OUTBOUND=${MAX_PRE_REPLY_OUTBOUND:-2}
+      - DB_DRIVER=${DB_DRIVER:-postgres}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-livechat}:${POSTGRES_PASSWORD:-change_this_postgres_password}@postgres:5432/${POSTGRES_DB:-livechat_db}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - livechat-internal-net
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: bsd-livechat-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-livechat}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_this_postgres_password}
+      POSTGRES_DB: ${POSTGRES_DB:-livechat_db}
+    volumes:
+      - livechat_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-livechat} -d ${POSTGRES_DB:-livechat_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - livechat-internal-net
+
+volumes:
+  livechat_pgdata:
+    driver: local
+
+networks:
+  livechat-internal-net:
+    driver: bridge

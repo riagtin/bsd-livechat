@@ -1,0 +1,32 @@
+{
+  "name": "bsd-livechat-gateway",
+  "version": "2.0.0",
+  "type": "module",
+  "private": true,
+  "description": "BSD LiveChat Gateway - Official Meta WhatsApp Cloud API Live Chat Bridge Server",
+  "license": "AGPL-3.0-only",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsup",
+    "build:binary": "tsup && docker run --rm -v ${PWD}:/app -w /app oven/bun:alpine bun build --compile --minify ./dist/server.cjs --outfile livechat-backend",
+    "start": "node dist/server.cjs",
+    "dev": "tsx watch src/server.ts",
+    "clean": "rimraf dist livechat-backend"
+  },
+  "dependencies": {
+    "@bintangstudio/livechat-sdk": "workspace:*",
+    "@fastify/cors": "^10.0.2",
+    "@fastify/rate-limit": "^10.2.2",
+    "dotenv": "^16.4.7",
+    "fastify": "^5.2.1",
+    "pg": "^8.13.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.9",
+    "@types/pg": "^8.11.11",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.5.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}
