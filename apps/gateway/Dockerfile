@@ -11,8 +11,9 @@ RUN apk --no-cache add ca-certificates tzdata libstdc++ libgcc wget && \
 
 WORKDIR /app
 
-# Salin binary Linux yang telah dikompilasi
+# Salin binary Linux yang telah dikompilasi dan widget script
 COPY --chown=appuser:appgroup livechat-backend .
+COPY --chown=appuser:appgroup widget.js* .
 RUN chmod +x livechat-backend
 
 # Jalankan container sebagai non-root demi keamanan

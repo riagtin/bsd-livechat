@@ -160,15 +160,18 @@ export class AgentRouter {
     try {
       await client.query('BEGIN');
 
+      const localPhone = normPhone.startsWith('62') ? '0' + normPhone.slice(2) : normPhone;
+      const cleanCode = normCode.replace(/[^A-Z0-9]/g, '');
+
       const res = await client.query(
         `
         SELECT * FROM channel_agents
-        WHERE wa_phone = $1
-          AND verification_code = $2
+        WHERE (wa_phone = $1 OR wa_phone = $4)
+          AND (verification_code = $2 OR verification_code = $5)
           AND (verification_expires_at IS NULL OR verification_expires_at > $3)
         FOR UPDATE
       `,
-        [normPhone, normCode, now]
+        [normPhone, normCode, now, localPhone, cleanCode]
       );
 
       if (res.rows.length === 0) {
@@ -241,31 +244,34 @@ export class AgentRouter {
             [phoneFp, now, claimId]
           );
 
+          const trialEndsAt = now + (7 * 86400000);
           await client.query(
             `
             UPDATE tenants
             SET subscription_status = 'trialing',
                 trial_started_at = $1,
-                trial_ends_at = $1 + (7 * 86400000)
-            WHERE tenant_id = $2
+                trial_ends_at = $2
+            WHERE tenant_id = $3
               AND subscription_status = 'pending_payment'
               AND plan_tier = 'starter'
             `,
-            [now, agent.tenantId]
-          );
-
-          // Grant 20 trial credits if newly activated trial tenant
-          await client.query(
-            `
-            INSERT INTO tenant_credit_balances (tenant_id, bundle_balance, topup_balance, updated_at)
-            VALUES ($1, 20, 0, $2)
-            ON CONFLICT (tenant_id) DO UPDATE SET
-              bundle_balance = GREATEST(tenant_credit_balances.bundle_balance, 20),
-              updated_at = $2
-            `,
-            [agent.tenantId, now]
+            [now, trialEndsAt, agent.tenantId]
           );
         }
+      }
+
+      // Automatically deposit 20 trial credits if tenant balance is empty
+      if (!isDuplicatePhone) {
+        await client.query(
+          `
+          INSERT INTO tenant_credit_balances (tenant_id, bundle_balance, topup_balance, updated_at)
+          VALUES ($1, 20, 0, $2)
+          ON CONFLICT (tenant_id) DO UPDATE SET
+            bundle_balance = GREATEST(tenant_credit_balances.bundle_balance, 20),
+            updated_at = $2
+          `,
+          [agent.tenantId, now]
+        );
       }
 
       await client.query('COMMIT');
