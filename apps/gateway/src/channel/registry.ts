@@ -10,6 +10,7 @@ export class ChannelRegistry {
   private csPhoneToChannels = new Map<string, Set<string>>();
 
   private isInitialized = false;
+  private lastSyncTime = 0;
 
   async init(): Promise<void> {
     if (this.isInitialized) return;
@@ -19,6 +20,24 @@ export class ChannelRegistry {
     await this.initializeDefaultTenantAndChannel();
 
     // 2. Hydrate in-memory cache from Database
+    await this.syncFromDatabase(true);
+
+    // 3. Start background periodic sync every 15s to capture dynamic console updates
+    setInterval(() => {
+      this.syncFromDatabase().catch(() => {});
+    }, 15000).unref();
+  }
+
+  /**
+   * Synchronize channels and tenants from database with 15s throttle
+   */
+  async syncFromDatabase(force = false): Promise<void> {
+    const now = Date.now();
+    if (!force && now - this.lastSyncTime < 15000) {
+      return;
+    }
+    this.lastSyncTime = now;
+
     try {
       const db = getDatabase();
       const dbTenants = await db.tenants.list();
@@ -31,9 +50,11 @@ export class ChannelRegistry {
         this.indexChannelInMemory(c);
       }
 
-      console.log(`[ChannelRegistry] Loaded ${this.tenants.size} tenants and ${this.channels.size} channels.`);
+      if (force) {
+        console.log(`[ChannelRegistry] Synced ${this.tenants.size} tenants and ${this.channels.size} channels from DB.`);
+      }
     } catch (err: any) {
-      console.warn(`[ChannelRegistry] Error hydrating from database (${err.message}). Using memory defaults.`);
+      console.warn(`[ChannelRegistry] Error syncing from database (${err.message}). Using memory state.`);
     }
   }
 
@@ -156,6 +177,41 @@ export class ChannelRegistry {
       const d = rawDomain.toLowerCase().replace(/^https?:\/\//, '').split(':')[0].trim();
       return reqHost === d || reqHost.endsWith(`.${d}`);
     });
+  }
+
+  /**
+   * Check if an origin/host matches ANY allowed domain across active registered channels in registry/DB
+   * Used by Fastify CORS to dynamically allow registered merchant origins
+   */
+  isOriginAllowedAnywhere(originOrHost: string): boolean {
+    if (!originOrHost) return true;
+
+    let reqHost = '';
+    try {
+      reqHost = new URL(originOrHost).hostname.toLowerCase();
+    } catch {
+      reqHost = originOrHost.toLowerCase().replace(/^https?:\/\//, '').split(':')[0].trim();
+    }
+
+    if (reqHost === 'localhost' || reqHost === '127.0.0.1') return true;
+
+    // 1. Check static config allowed domains (.env)
+    for (const raw of config.allowedDomains) {
+      const d = raw.toLowerCase().replace(/^https?:\/\//, '').split(':')[0].trim();
+      if (d === '*' || reqHost === d || reqHost.endsWith(`.${d}`)) return true;
+    }
+
+    // 2. Check dynamic domains across all active registered channels
+    for (const ch of this.channels.values()) {
+      if (ch.status !== 'active') continue;
+      const domains = ch.allowedDomains || [];
+      for (const raw of domains) {
+        const d = raw.toLowerCase().replace(/^https?:\/\//, '').split(':')[0].trim();
+        if (d === '*' || reqHost === d || reqHost.endsWith(`.${d}`)) return true;
+      }
+    }
+
+    return false;
   }
 }
 

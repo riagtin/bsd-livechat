@@ -28,7 +28,7 @@ export class BsdLiveChatWidget {
         options.welcomeMessage ||
         'Halo! Selamat datang di layanan bantuan kami. Silakan tinggalkan pertanyaan Anda, tim kami akan merespons langsung.',
       theme: options.theme || 'auto',
-      logoUrl: options.logoUrl || '/livechat.png',
+      logoUrl: options.logoUrl || '',
       position: options.position || 'bottom-right',
       lang: options.lang || 'id',
       autoOpenDelayMs: options.autoOpenDelayMs || 0,
@@ -152,7 +152,14 @@ export class BsdLiveChatWidget {
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        if (res.status === 403) {
+          console.warn(`[BsdLiveChat] Domain "${window.location.hostname}" belum didaftarkan pada Merchant Console untuk saluran ini.`);
+          const container = this.shadow?.querySelector('.bsd-chat-container');
+          if (container) (container as HTMLElement).style.display = 'none';
+        }
+        throw new Error(`HTTP ${res.status}`);
+      }
 
       const data: InitSessionResponse = await res.json();
       this.sessionId = data.session_id;
@@ -357,7 +364,14 @@ export class BsdLiveChatWidget {
         throw new Error(`HTTP ${res.status}`);
       }
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        if (res.status === 403) {
+          console.warn(`[BsdLiveChat] Domain "${window.location.hostname}" belum didaftarkan pada Merchant Console untuk saluran ini.`);
+          const container = this.shadow?.querySelector('.bsd-chat-container');
+          if (container) (container as HTMLElement).style.display = 'none';
+        }
+        throw new Error(`HTTP ${res.status}`);
+      }
 
       optimisticMsg.status = 'sent';
       this.renderMessages();
@@ -536,7 +550,11 @@ export class BsdLiveChatWidget {
       <!-- Trigger Button (Dual-Brand Trust with Corner WhatsApp Badge) -->
       <button class="bsd-trigger-btn" title="${triggerTitle}">
         <div class="bsd-trigger-icon-chat">
-          <img src="${this.options.logoUrl}" alt="LiveChat" class="bsd-trigger-img" />
+          ${this.options.logoUrl
+            ? `<img src="${this.options.logoUrl}" alt="LiveChat" class="bsd-trigger-img" onerror="this.style.display='none'; if (this.nextElementSibling) (this.nextElementSibling as HTMLElement).style.display='block';" />
+               <svg class="bsd-trigger-svg-fallback" style="display:none;" viewBox="0 0 24 24"><path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z"/></svg>`
+            : `<svg class="bsd-trigger-svg-fallback" viewBox="0 0 24 24"><path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z"/></svg>`
+          }
         </div>
         <div class="bsd-trigger-icon-close">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>

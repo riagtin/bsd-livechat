@@ -7,7 +7,7 @@
   "homepage": "https://bintangstudio.tech",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bintangstudio/livechat.git",
+    "url": "https://github.com/riagtin/bsd-livechat.git",
     "directory": "packages/sdk"
   },
   "publishConfig": {

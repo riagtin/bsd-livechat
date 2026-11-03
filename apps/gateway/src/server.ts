@@ -10,6 +10,7 @@ import { clientRoutes } from './routes/client.js';
 import { internalRoutes } from './routes/internal.js';
 import { webhookRoutes } from './routes/webhook.js';
 import { observabilityService } from './monitoring/observability.js';
+import { getWidgetScript } from './assets/widgetScript.js';
 
 export async function buildServer() {
   // G8 Fail-Fast: Validate mandatory configuration variables before startup
@@ -58,16 +59,35 @@ export async function buildServer() {
         return cb(null, true);
       }
 
-      const isAllowed = config.allowedDomains.some((rawDomain) => {
+      // 1. Cek domain statis dari config (.env)
+      const isConfigAllowed = config.allowedDomains.some((rawDomain) => {
         const domain = rawDomain.toLowerCase().replace(/^https?:\/\//, '').split(':')[0].trim();
         return reqHost === domain || reqHost.endsWith(`.${domain}`);
       });
 
-      if (isAllowed) {
-        cb(null, true);
-      } else {
-        cb(new Error(`CORS error: Origin ${origin} is not allowed.`), false);
+      if (isConfigAllowed) {
+        return cb(null, true);
       }
+
+      // 2. Cek domain dinamis dari saluran-saluran aktif yang terdaftar di console
+      const isChannelAllowed = channelRegistry.isOriginAllowedAnywhere(origin);
+      if (isChannelAllowed) {
+        return cb(null, true);
+      }
+
+      // Sync dari database jika domain baru saja ditambahkan di console
+      channelRegistry
+        .syncFromDatabase(true)
+        .then(() => {
+          if (channelRegistry.isOriginAllowedAnywhere(origin)) {
+            cb(null, true);
+          } else {
+            cb(new Error(`CORS error: Origin ${origin} is not allowed.`), false);
+          }
+        })
+        .catch(() => {
+          cb(new Error(`CORS error: Origin ${origin} is not allowed.`), false);
+        });
     },
     methods: ['GET', 'POST', 'OPTIONS'],
     credentials: true,
@@ -96,9 +116,28 @@ export async function buildServer() {
       version: '2.0.0',
       license: 'AGPL-3.0-only',
       brand: 'Bintang Studio',
-      source: 'https://github.com/bintangstudio/livechat',
+      source: 'https://github.com/riagtin/bsd-livechat',
       docs: 'https://bintangstudio.tech/docs',
     };
+  });
+
+  // CDN Endpoint: Serves the client chat widget bundle directly from Gateway
+  server.get('/widget.js', async (req, reply) => {
+    try {
+      const script = getWidgetScript();
+      reply.header('Content-Type', 'application/javascript; charset=utf-8');
+      reply.header('Access-Control-Allow-Origin', '*');
+      reply.header('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+      return reply.send(script);
+    } catch (err: any) {
+      server.log.error(err, '[WidgetCDN] Failed to load widget script');
+      return reply.status(500).send({ error: 'Widget bundle temporarily unavailable.' });
+    }
+  });
+
+  // Silent 204 for widget source map to prevent browser devtools 404 noise
+  server.get('/widget.js.map', { logLevel: 'silent' }, async (req, reply) => {
+    return reply.status(204).send();
   });
 
   // Register Route Plugins
@@ -126,6 +165,7 @@ async function start() {
     });
     console.log(`\n=============================================================`);
     console.log(`🚀 BSD LiveChat Gateway running at: ${address}`);
+    console.log(`☁️ Meta Relay Sender Phone: ${config.meta.displayPhoneNumber || 'NOT CONFIGURED'}`);
     console.log(`📱 Target CS WhatsApp Phone: ${config.meta.csPhone || 'NOT CONFIGURED'}`);
     console.log(`🔒 Allowed CORS Domains: ${config.allowedDomains.join(', ')}`);
     console.log(`⚡ Real-time Stream: ${address}/api/v1/client/stream`);

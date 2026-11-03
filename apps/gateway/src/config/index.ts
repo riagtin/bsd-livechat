@@ -43,7 +43,7 @@ export const config = {
     apiVersion: process.env.META_API_VERSION || 'v22.0',
     wabaId: process.env.META_WABA_ID || '',
     phoneNumberId: process.env.META_PHONE_NUMBER_ID || '',
-    displayPhoneNumber: process.env.META_DISPLAY_PHONE || process.env.CS_WHATSAPP_PHONE || '',
+    displayPhoneNumber: process.env.META_DISPLAY_PHONE || '6285121140886',
     accessToken: process.env.META_ACCESS_TOKEN || '',
     appSecret: process.env.META_APP_SECRET || '',
     verifyToken: process.env.META_VERIFY_TOKEN || '',

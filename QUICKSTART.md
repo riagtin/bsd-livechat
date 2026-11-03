@@ -42,7 +42,7 @@ Buka **WhatsApp Manager** $\to$ **Account Tools** $\to$ **Message Templates**, l
 
 ### Langkah A: Clone Repositori
 ```bash
-git clone https://github.com/bintangstudio/livechat.git
+git clone https://github.com/riagtin/bsd-livechat.git
 cd livechat
 ```
 

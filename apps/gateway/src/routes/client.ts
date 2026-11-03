@@ -43,7 +43,12 @@ export const clientRoutes: FastifyPluginAsync = async (fastify: FastifyInstance)
     }
 
     const targetChannelId = channel_id || 'default';
-    const channel = channelRegistry.getChannel(targetChannelId);
+    let channel = channelRegistry.getChannel(targetChannelId);
+
+    if (!channel) {
+      await channelRegistry.syncFromDatabase(true);
+      channel = channelRegistry.getChannel(targetChannelId);
+    }
 
     if (!channel) {
       return reply.status(404).send({ error: `Channel '${targetChannelId}' not found.` });
@@ -56,9 +61,13 @@ export const clientRoutes: FastifyPluginAsync = async (fastify: FastifyInstance)
     // Validate domain origin security for this specific channel
     const origin = req.headers.origin as string | undefined;
     if (origin && !channelRegistry.isDomainAllowedForChannel(channel.channelId, origin)) {
-      return reply.status(403).send({
-        error: `Origin '${origin}' is not authorized for channel '${channel.channelId}'.`,
-      });
+      // Force sync from DB in case domain was just added in Console
+      await channelRegistry.syncFromDatabase(true);
+      if (!channelRegistry.isDomainAllowedForChannel(channel.channelId, origin)) {
+        return reply.status(403).send({
+          error: `Origin '${origin}' is not authorized for channel '${channel.channelId}'.`,
+        });
+      }
     }
 
     // H2: Use existing session ID if active in store; otherwise generate fresh CSPRNG session ID
