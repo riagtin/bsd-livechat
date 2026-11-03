@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "type": "module",
   "private": true,
-  "description": "BSD LiveChat - Official Meta WhatsApp Cloud API Live Chat Bridge by PT. BINTANG STUDIO DIGITAL",
+  "description": "BSD LiveChat - Official Meta WhatsApp Cloud API Live Chat Bridge by Bintang Studio",
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",

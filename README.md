@@ -1,5 +1,9 @@
 # 💬 BSD LiveChat Gateway (Official Meta WhatsApp Cloud API Bridge)
 
+[![GitHub Release](https://img.shields.io/github/v/release/riagtin/bsd-livechat?color=10B981&label=Release)](https://github.com/riagtin/bsd-livechat/releases)
+[![Docker Image](https://img.shields.io/badge/docker-ghcr.io%2Friagtin%2Flivechat--gateway-blue?logo=docker)](https://github.com/riagtin/bsd-livechat/pkgs/container/livechat-gateway)
+[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL_3.0-blue.svg)](LICENSE)
+
 > **"Digital Innovation Without Limits."**  
 > Resmi dikembangkan oleh **Bintang Studio** ([bintangstudio.tech](https://bintangstudio.tech))
 
@@ -38,9 +42,16 @@
 
 ---
 
-## 🐳 Menjalankan Cepat dengan Docker Compose (Self-Hosted)
+## 🐳 Menjalankan Cepat dengan Docker (Self-Hosted)
 
-Bagi pengembang yang ingin langsung mencoba gateway tanpa perlu kompilasi:
+Tersedia container image siap pakai di **GitHub Packages (GHCR)**:
+
+```bash
+# Tarik image resmi dari GitHub Container Registry:
+docker pull ghcr.io/riagtin/livechat-gateway:latest
+```
+
+Atau jalankan full stack (Gateway + PostgreSQL) menggunakan Docker Compose:
 
 ```bash
 # 1. Pastikan file docker-compose.selfhost.yml dan .env sudah siap
