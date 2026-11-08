@@ -1,8 +1,10 @@
 services:
   gateway:
-    build:
-      context: .
-      dockerfile: Dockerfile.selfhost
+    image: ghcr.io/riagtin/livechat-gateway:latest
+    # Atau bangun sendiri secara lokal dari sumber kode:
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile.selfhost
     container_name: bsd-livechat-gateway
     restart: unless-stopped
     ports:

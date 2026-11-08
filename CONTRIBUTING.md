@@ -18,7 +18,7 @@ Before your pull request can be merged, you must sign our [Contributor License A
 
 1. **Fork and Clone:**
    ```bash
-   git clone https://github.com/bintangstudio/livechat.git
+   git clone https://github.com/riagtin/bsd-livechat.git
    cd livechat
    ```
 2. **Install Dependencies:**

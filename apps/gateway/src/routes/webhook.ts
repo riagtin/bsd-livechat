@@ -101,13 +101,16 @@ export const webhookRoutes: FastifyPluginAsync = async (fastify: FastifyInstance
               const wamid = status.id;
               const statusName = status.status;
               const errorCode = status.errors?.[0]?.code;
+              const errorTitle = status.errors?.[0]?.title || status.errors?.[0]?.message;
 
               // Update outbound message status in ledger
               await getUsageGate().updateOutboundStatus(wamid, statusName, wamid, errorCode);
 
               // Auto-refund credit on 'failed' delivery (Roadmap §5.4)
               if (statusName === 'failed') {
-                console.warn(`[Webhook] Outbound message ${wamid} failed delivery. Triggering automatic refund...`);
+                console.warn(
+                  `[Webhook] Outbound message ${wamid} failed delivery [Error: ${errorCode || 'UNKNOWN'}${errorTitle ? ` - ${errorTitle}` : ''}]. Triggering automatic refund...`
+                );
                 await getUsageGate().refundFailedOutbound(wamid);
               }
 
@@ -145,10 +148,10 @@ export const webhookRoutes: FastifyPluginAsync = async (fastify: FastifyInstance
                 `[Webhook] Inbound WhatsApp message from ${csPhone} [len: ${csText.length}, quoted: ${quotedWamid || 'NONE'}]`
               );
 
-              // Handshake check: VERIFIKASI <KODE> or VERIFY <KODE>
-              const verifyMatch = csText.match(/^(?:VERIFIKASI|VERIFY)\s+([A-Z0-9]+)$/i);
+              // Handshake check: VERIFIKASI <KODE> or VERIFY <KODE> (supports colons, dashes, extra spaces)
+              const verifyMatch = csText.match(/(?:VERIFIKASI|VERIFY)[:\s]+([A-Z0-9\-_]{4,20})/i);
               if (verifyMatch) {
-                const code = verifyMatch[1];
+                const code = verifyMatch[1].replace(/[^A-Z0-9]/gi, '').toUpperCase();
                 const verifiedAgent = await agentRouter.verifyAgentByCode(csPhone, code);
                 if (verifiedAgent) {
                   console.log(

@@ -159,6 +159,13 @@ export const WIDGET_CSS = `
   filter: drop-shadow(0 2px 6px rgba(0, 229, 255, 0.3));
 }
 
+.bsd-trigger-svg-fallback {
+  width: 28px;
+  height: 28px;
+  fill: var(--bsd-primary);
+  filter: drop-shadow(0 2px 6px rgba(0, 229, 255, 0.4));
+}
+
 .bsd-trigger-icon-close {
   opacity: 0;
   transform: rotate(-90deg) scale(0.5);

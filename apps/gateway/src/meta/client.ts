@@ -235,8 +235,8 @@ export class MetaClient {
 
   /**
    * Notify CS with automatic 24-hour service window fallback:
-   * 1. Attempt free-form message to target CS phone
-   * 2. If rejected due to 24-hr window expiration (Error 131047), fallback to Utility Template
+   * - If 24-hr window is active (isWindowOpen = true): send free-form message
+   * - If 24-hr window is closed (isWindowOpen = false): directly send approved Utility Template to wake up CS and open window
    */
   async notifyCsWithAutoFallback(
     toPhone: string,
@@ -246,7 +246,8 @@ export class MetaClient {
     pageUrl: string,
     batchedText: string,
     sessionCode?: string,
-    credentials?: ResolvedWabaCredentials | MetaCredentialsOverride
+    credentials?: ResolvedWabaCredentials | MetaCredentialsOverride,
+    isWindowOpen = false
   ): Promise<MetaSendResult> {
     const to = (toPhone || config.meta.csPhone).replace(/\D/g, '');
     if (!to) {
@@ -254,33 +255,35 @@ export class MetaClient {
       return { success: true, wamid: `mock_no_cs_${Date.now()}`, category: 'service' };
     }
 
-    const shortId = (sessionCode || sessionId.slice(-6)).toUpperCase();
-    const formattedMessage = `*${businessName} - #${shortId}*\n${batchedText}`;
+    // Step 1: If 24-hr window is known to be open, send free-form text
+    if (isWindowOpen) {
+      const shortId = (sessionCode || sessionId.slice(-6)).toUpperCase();
+      const formattedMessage = `*${businessName} - #${shortId}*\n${batchedText}`;
+      const freeFormResult = await this.sendFreeFormText(to, formattedMessage, credentials);
 
-    // Step 1: Try free-form message
-    const freeFormResult = await this.sendFreeFormText(to, formattedMessage, credentials);
+      if (freeFormResult.success) {
+        return freeFormResult;
+      }
 
-    if (freeFormResult.success) {
-      return freeFormResult;
-    }
-
-    // Step 2: If rejected due to 24-hr window, trigger Utility Template Auto-Wakeup
-    if (freeFormResult.is24hExpired || freeFormResult.errorCode === 131047 || freeFormResult.errorCode === 131026) {
-      console.log(
-        `[MetaClient] 24-Hour Window expired for CS (${to}) [Error: ${freeFormResult.errorCode || 'EXPIRED'}]. Triggering Auto-Wakeup via Utility Template.`
-      );
-      return await this.sendUtilityTemplate(
-        to,
-        sessionId,
-        businessName,
-        pageUrl,
-        batchedText,
-        sessionCode,
-        credentials
+      console.warn(
+        `[MetaClient] Free-form send failed for CS (${to}) [Error: ${freeFormResult.errorCode || 'UNKNOWN'}]. Falling back to Utility Template.`
       );
     }
 
-    return freeFormResult;
+    // Step 2: Window is closed (or free-form attempt was rejected): send approved Utility Template to wake up CS
+    console.log(
+      `[MetaClient] 24-Hour Window is closed for CS (${to}). Dispatching Utility Template (${credentials?.templateName || config.meta.utilityTemplateName}) to open 24h window.`
+    );
+
+    return await this.sendUtilityTemplate(
+      to,
+      sessionId,
+      businessName,
+      pageUrl,
+      batchedText,
+      sessionCode,
+      credentials
+    );
   }
 
   /**

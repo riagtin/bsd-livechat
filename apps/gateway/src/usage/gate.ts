@@ -240,7 +240,7 @@ export class CreditUsageGate implements IUsageGate {
       SET status = $2,
           wamid = COALESCE($3, wamid),
           error_code = COALESCE($4, error_code)
-      WHERE outbound_id = $1
+      WHERE outbound_id = $1 OR wamid = $1
     `,
       [outboundId, status, wamid || null, errorCode || null]
     );
@@ -256,7 +256,7 @@ export class CreditUsageGate implements IUsageGate {
       await client.query('BEGIN');
 
       const outRes = await client.query(
-        `SELECT tenant_id, credit_charged, status FROM outbound_messages WHERE outbound_id = $1`,
+        `SELECT tenant_id, credit_charged, status, outbound_id FROM outbound_messages WHERE outbound_id = $1 OR wamid = $1`,
         [outboundId]
       );
 
@@ -265,13 +265,13 @@ export class CreditUsageGate implements IUsageGate {
         return false;
       }
 
-      const { tenant_id, credit_charged } = outRes.rows[0];
+      const { tenant_id, credit_charged, outbound_id: resolvedOutboundId } = outRes.rows[0];
       if (!credit_charged) {
         await client.query('ROLLBACK');
         return false; // Free message, no credit to refund
       }
 
-      const externalRef = `refund:${outboundId}`;
+      const externalRef = `refund:${resolvedOutboundId || outboundId}`;
 
       // Check if already refunded
       const existRes = await client.query(

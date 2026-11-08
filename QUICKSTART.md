@@ -42,9 +42,15 @@ Buka **WhatsApp Manager** $\to$ **Account Tools** $\to$ **Message Templates**, l
 
 ### Langkah A: Clone Repositori
 ```bash
-git clone https://github.com/bintangstudio/livechat.git
-cd livechat
+git clone https://github.com/riagtin/bsd-livechat.git
+cd bsd-livechat
 ```
+
+> **Tips Cepat:** Anda juga dapat mengunduh image container resmi dari GitHub Packages:
+> ```bash
+> docker pull ghcr.io/riagtin/livechat-gateway:latest
+> ```
+> Konfigurasi `docker-compose.selfhost.yml` telah tersetting otomatis menggunakan image `ghcr.io/riagtin/livechat-gateway:latest`.
 
 ### Langkah B: Buat File `.env`
 Salin template konfigurasi:
