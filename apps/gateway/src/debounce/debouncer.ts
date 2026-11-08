@@ -149,10 +149,13 @@ export class MessageDebouncer {
     const resolvedCreds = conn ? wabaManager.resolveCredentials(conn) : undefined;
     const isByo = conn?.ownerType === 'tenant';
 
+    // Check if 24-hr service window is currently active for this CS phone
+    const isWindowOpen = await agentRouter.isWindowActive(connId, toPhone);
+
     // 5. Zero-Deficit Credit Gate (Roadmap §4.3 & §9.3a)
     const outboundId = `out_${Date.now()}_${crypto.randomBytes(6).toString('hex')}`;
     const usageGate = getUsageGate();
-    const category: OutboundCategory = 'template';
+    const category: OutboundCategory = isWindowOpen ? 'service' : 'template';
 
     const deductResult = await usageGate.deductCredit(
       channel.tenantId,
@@ -176,7 +179,7 @@ export class MessageDebouncer {
     }
 
     console.log(
-      `[Debouncer] Batching ${localIds.length} messages for session ${sessionId} to WhatsApp CS (${toPhone}) in channel [${channel.channelId}].`
+      `[Debouncer] Batching ${localIds.length} messages for session ${sessionId} to WhatsApp CS (${toPhone}) in channel [${channel.channelId}] (portal: ${isWindowOpen ? 'OPEN' : 'CLOSED'}).`
     );
 
     // 6. Forward to WhatsApp with Auto-Fallback
@@ -188,7 +191,8 @@ export class MessageDebouncer {
       entry.pageUrl,
       combinedText,
       session?.sessionCode,
-      resolvedCreds
+      resolvedCreds,
+      isWindowOpen
     );
 
     if (result.success && result.wamid) {

@@ -326,6 +326,25 @@ export class AgentRouter {
     );
   }
 
+  /**
+   * Check if 24-hour WhatsApp service window is currently active for CS phone
+   */
+  async isWindowActive(connectionId: string, waPhone: string): Promise<boolean> {
+    if (!this.pool) return false;
+    const normPhone = waPhone.replace(/\D/g, '');
+    const now = Date.now();
+    try {
+      const res = await this.pool.query(
+        `SELECT 1 FROM wa_windows WHERE connection_id = $1 AND wa_phone = $2 AND window_expires_at > $3 LIMIT 1`,
+        [connectionId, normPhone, now]
+      );
+      return res.rows.length > 0;
+    } catch (err) {
+      console.warn('[AgentRouter] Error querying wa_windows active state:', err);
+      return false;
+    }
+  }
+
   private mapAgentRow(r: Record<string, unknown>): ChannelAgent {
     return {
       agentId: String(r.agent_id),
